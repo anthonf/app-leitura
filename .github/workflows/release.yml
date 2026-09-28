@@ -21,13 +21,20 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew || true
+        run: chmod +x ./gradlew
 
       - name: Build Debug APK with Gradle
         run: ./gradlew assembleDebug --no-daemon
+
+      - name: Verify APK Generated
+        run: |
+          echo "Verificando se o APK foi gerado..."
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -35,19 +42,20 @@ jobs:
           name: VersoLivros-Debug-APK
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Create GitHub Release with APK Download
+      - name: Create or Update GitHub Release with APK
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          name: "VersoLivros v1.0 - APK para Testes"
           tag_name: "v1.0.0-test"
+          name: "VersoLivros v1.0 - APK para Testes"
           body: |
-            ## VersoLivros - Versão para Testes Android
+            ### 📥 Download do APK VersoLivros
+            Baixe o arquivo **app-debug.apk** abaixo para testar diretamente no seu dispositivo Android.
             
-            ### Novidades:
-            - **Upload de Capítulos**: Importação direta de arquivos `.txt` e `.md`
-            - **Múltiplas Categorias**: Suporte a múltiplos gêneros e categorias personalizadas
-            - **Busca de Livros**: Pesquisa em tempo real por título, autor e categorias
-            - **Leitor com Conforto Visual**: Modo Noturno (Dark), Sépia, Claro e OLED com fontes customizáveis
-            - **Feedback e Comentários**: Comentários por capítulo e avaliações beta
+            #### Recursos incluídos nesta versão:
+            - **Upload de Capítulos**: Importação de arquivos `.txt` e `.md` diretamente do armazenamento.
+            - **Múltiplas Categorias**: Suporte a múltiplos gêneros e adição de tags personalizadas.
+            - **Busca em Tempo Real**: Pesquisa ágil por título, autor e categorias.
+            - **Leitor com Conforto Visual**: Modo Noturno (Dark), Sépia, Claro e OLED, com controle de fontes e tamanhos.
+            - **Comentários & Feedback**: Comentários por capítulo e avaliações beta com termômetro da comunidade.
+          prerelease: true
           files: app/build/outputs/apk/debug/app-debug.apk
