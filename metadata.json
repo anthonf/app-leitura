@@ -1,0 +1,6 @@
+{
+  "name": "VersoLivros",
+  "description": "Plataforma de versionamento e revisão de livros com leitor integrado, comentários por capítulo e feedback da comunidade.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
