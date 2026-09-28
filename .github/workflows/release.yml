@@ -1,0 +1,53 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew || true
+
+      - name: Build Debug APK with Gradle
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VersoLivros-Debug-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Create GitHub Release with APK Download
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          name: "VersoLivros v1.0 - APK para Testes"
+          tag_name: "v1.0.0-test"
+          body: |
+            ## VersoLivros - Versão para Testes Android
+            
+            ### Novidades:
+            - **Upload de Capítulos**: Importação direta de arquivos `.txt` e `.md`
+            - **Múltiplas Categorias**: Suporte a múltiplos gêneros e categorias personalizadas
+            - **Busca de Livros**: Pesquisa em tempo real por título, autor e categorias
+            - **Leitor com Conforto Visual**: Modo Noturno (Dark), Sépia, Claro e OLED com fontes customizáveis
+            - **Feedback e Comentários**: Comentários por capítulo e avaliações beta
+          files: app/build/outputs/apk/debug/app-debug.apk
